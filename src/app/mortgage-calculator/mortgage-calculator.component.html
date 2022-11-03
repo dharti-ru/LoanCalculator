@@ -1,0 +1,196 @@
+<div class="padding-16">
+<h1><mat-icon color="primary">home</mat-icon>Mortgage Calculator</h1>
+<hr color="accent"/>
+<p>This calculator determines your mortgage payment and provides you with a mortgage payment schedule.</p>
+
+<mat-grid-list cols="4" rowHeight="2:3">
+    <mat-grid-tile colspan="2" class="mortgage-form">
+<mat-card>
+    <form [formGroup]="mortgageCalculatorForm" (ngSubmit)="calculateMortgage()">
+        <div class="pymt-container">  
+        <mat-card-title>Payment Plan</mat-card-title>
+        <div>
+            <mat-form-field appearance="fill">
+                <mat-label>Mortgage Amount *</mat-label>
+                <span matPrefix><mat-icon>attach_money</mat-icon></span>
+                <input aria-label="Enter mortgage amount" type="number" formControlName="principleAmt" matInput min="1" placeholder="100,000.00">
+                <mat-icon color="primary" matSuffix matTooltip="The amount you expect to borrow from your financial institution. It is calculated as the purchase price of your home, minus the down payment plus any applicable mortgage loan insurance premium you have to pay.">info</mat-icon>
+                <mat-error>Please enter an amount greater than 0.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Interest Rate *</mat-label>            
+                <mat-icon color="primary" matPrefix matTooltip="Annual interest rate for this mortgage.">info</mat-icon>
+                <input aria-label="Enter interest rate" type="number" formControlName="interestRate" min="1" max="100" matInput placeholder="1.0">
+                <mat-icon matSuffix>percent</mat-icon>
+                <mat-error>Please enter a percent greater than 0 and less than 100.</mat-error>
+            </mat-form-field>
+        </div>
+
+        <div> Amortization Period</div>
+        <div>
+        <mat-form-field appearance="fill">
+            <mat-label>Years *</mat-label>
+            <mat-select aria-label="Select amortization years" formControlName="amortizationYrs">
+                <mat-option *ngFor="let n of numSequence(30);" [value]="n">{{n == 1 ? n+' Year' : n+" Years"}}</mat-option>
+            </mat-select>
+            <mat-icon color="primary" matSuffix matTooltip="The number of years and months over which you will repay this loan. The most common amortization period is 25 years. Not to be confused with the term of your loan, which is the duration of the loan agreement you signed with your financial institution and that has to be renewed regularly. Terms are generally for 1 to 10 years.">info</mat-icon>
+            <mat-error >Please select Amortization Years</mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="fill">
+            <mat-label>Months</mat-label>
+            <mat-select aria-label="Select amortization months" formControlName="amortizationMonths">
+                <mat-option value="">Select Months</mat-option>
+                <mat-option *ngFor="let n of numSequence(11);" [value]="n">{{n == 1 ? n+' Month' : n+" Months"}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        </div>
+        <div>
+        <mat-form-field appearance="fill">
+            <mat-label>Payment Frequency *</mat-label>
+            <mat-select aria-label="Select payment frequency" formControlName="pymtFrequency">
+              <mat-option value="52">Weekly</mat-option>
+              <mat-option value="26">Bi-weekly (every 2 weeks)</mat-option>
+              <mat-option value="24">Semi-monthly (24x per year)</mat-option>
+              <mat-option value="12">Monthly (12x per year)</mat-option>
+            </mat-select>
+            <mat-icon color="primary" matSuffix matTooltip="By choosing an accelerated payment frequency, you can reduce your amortization period and save thousands of dollars in interest in the long run. For example, the accelerated bi-weekly payment allows you to pay half of your monthly payment every two weeks. You will therefore make 26 payments a year, the equivalent of one extra monthly payment a year.">info</mat-icon>
+            <mat-error >Please select Payment Frequency</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Term *</mat-label>
+            <mat-select aria-label="Select term" formControlName="term">
+                <mat-option *ngFor="let n of numSequence(10);" [value]="n">{{n == 1 ? n+' Year' : n+" Years"}}</mat-option>
+            </mat-select>
+            <mat-icon color="primary" matSuffix matTooltip="The number of term years.">info</mat-icon>
+            <mat-error>Please select Term </mat-error>
+        </mat-form-field>
+        </div>
+        </div>
+        <!-- <div class="inline-block">
+            
+    <mat-card-title>Prepayment Plan</mat-card-title>
+        <div>
+            <mat-form-field appearance="fill">
+                <mat-label>Prepayment Amount</mat-label>
+                <span matPrefix><mat-icon>attach_money</mat-icon></span>
+                <input type="number" formControlName="prepymtAmt" matInput placeholder="100,000.00">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field appearance="fill">
+                <mat-label>Prepayment Frequency</mat-label>
+                <mat-select formControlName="prepymtFreq">
+                    <mat-option value="">Select Prepayment Frequency</mat-option>
+                    <mat-option value="oneTime">One time</mat-option>
+                    <mat-option value="eachYear">Each year</mat-option>
+                    <mat-option value="sameAsRegular">same as regular payment</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>info</mat-icon>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field appearance="fill">
+                <mat-label>Start With Payment</mat-label>
+                <input type="tel" formControlName="startWith" matInput placeholder="555-555-1234">
+                <mat-icon matSuffix>info</mat-icon>
+            </mat-form-field>
+        </div>
+    </div> -->
+    
+    <mat-card-actions>
+        <button color="primary" [disabled]="mortgageCalculatorForm.invalid" mat-raised-button type="submit">Calculate</button>
+    </mat-card-actions>
+    </form>
+</mat-card>
+</mat-grid-tile>
+<mat-grid-tile colspan="2">
+<table *ngIf="dataSource.length > 0" mat-table [dataSource]="dataSource" class="mat-elevation-z8 mortgage-data">
+    <ng-container matColumnDef="category">
+      <th mat-header-cell *matHeaderCellDef> Category </th>
+      <td mat-cell *matCellDef="let element"> {{element.category}} </td>
+    </ng-container>
+    <ng-container matColumnDef="term">
+      <th mat-header-cell *matHeaderCellDef> Term </th>
+      <td mat-cell *matCellDef="let element; let i=index;"> {{i == 0 ? element.term : (element.term | currency: '$')}} </td>
+    </ng-container>
+    <ng-container matColumnDef="amortization">
+      <th mat-header-cell *matHeaderCellDef> Amortization Period </th>
+      <td mat-cell *matCellDef="let element; let i=index;">
+        {{i == 0 && addParams.extraInstallment > 0 ? element.amortization+' + '+addParams.extraInstallment+' final payment of '+ (addParams.extraPayment | currency:'$') 
+        : element.amortization | currency: '$'}} </td>
+    </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+</mat-grid-tile>
+</mat-grid-list>
+<div *ngIf="emiList.length > 0">
+<h1><mat-icon color="primary">summarize</mat-icon>Mortgage Summary</h1>
+<hr color="accent"/>
+<div class="loan-calculation-content">
+    <p>Over the {{mortgageCalculatorForm.value['amortizationYrs']}}-year amortization period, you will:</p>
+    <ul>
+        <li>have made 
+            <strong>{{tenureMonths}}</strong> 
+            {{pymtFrequencyMapping.get(mortgageCalculatorForm.value['pymtFrequency']) | lowercase}} payments of 
+            <strong>{{addParams.monthlyEmi | currency : '$'}}</strong>
+            <span *ngIf="addParams.extraPayment"> and {{addParams.extraInstallment}} final payment of
+            <strong>{{addParams.extraPayment | currency : '$'}}</strong></span>
+        </li>
+        <li>have paid <strong>{{addParams.totalPrinciple | currency : '$'}}</strong> in principal,
+            <strong>{{addParams.totalInterest | currency : '$'}}</strong> in interest, for a total of <strong>{{addParams.totalCost | currency : '$'}}</strong>.</li>
+    </ul>
+    <p>Over the 2-year term, you will:</p>
+    <ul>
+        <li>have made <strong>{{termMonths}}</strong> {{pymtFrequencyMapping.get(mortgageCalculatorForm.value['pymtFrequency']) | lowercase}} payments of 
+            <strong>{{addParams.monthlyEmi | currency : '$'}}</strong>
+        <li>have paid <strong>{{addParams.termTotalPrinciple | currency : '$'}}</strong> in principal, <strong>{{addParams.termTotalInterest | currency : '$'}}</strong> in interest, for a total of <strong>{{addParams.termTotalCost | currency : '$'}}</strong>.</li>
+    </ul>
+    <p>At the end of your 2-year term, you will:</p>
+    <ul>
+        <li>have a balance of <strong>{{addParams.termEndingBalance | currency : '$'}}</strong>.</li>
+    </ul>
+</div>
+<hr color="accent"/>
+<h1><mat-icon color="primary">view_list</mat-icon>Mortgage EMI Details</h1>
+
+<div class="mat-elevation-z8 emi-list">
+<table mat-table [dataSource]="emiList">
+    <ng-container matColumnDef="installmentId">
+      <th mat-header-cell *matHeaderCellDef> Installment # </th>
+      <td mat-cell *matCellDef="let element"> {{element.installmentId}} </td>
+    </ng-container>
+    <ng-container matColumnDef="startingBalance">
+      <th mat-header-cell *matHeaderCellDef> Starting Balance </th>
+      <td mat-cell *matCellDef="let element">{{element.startingBalance}}</td>
+    </ng-container>
+    <ng-container matColumnDef="monthlyEmi">
+      <th mat-header-cell *matHeaderCellDef> You Paid </th>
+      <td mat-cell *matCellDef="let element">{{element.monthlyEmi}}</td>
+    </ng-container>
+    <ng-container matColumnDef="monthlyInterest">
+      <th mat-header-cell *matHeaderCellDef> Interest </th>
+      <td mat-cell *matCellDef="let element">{{element.monthlyInterest}}</td>
+    </ng-container>
+    <ng-container matColumnDef="monthlyPrinciple">
+      <th mat-header-cell *matHeaderCellDef> Principle </th>
+      <td mat-cell *matCellDef="let element">{{element.monthlyPrinciple}}</td>
+    </ng-container>
+    <ng-container matColumnDef="endingBalance">
+      <th mat-header-cell *matHeaderCellDef> Ending Balance </th>
+      <td mat-cell *matCellDef="let element">{{element.endingBalance}}</td>
+    </ng-container>
+    <ng-container matColumnDef="totalInterest">
+      <th mat-header-cell *matHeaderCellDef> Total Interest </th>
+      <td mat-cell *matCellDef="let element">{{element.totalInterest}}</td>
+    </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumnsEMI; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnsEMI;"></tr>
+</table>
+</div>
+</div>
+</div>
